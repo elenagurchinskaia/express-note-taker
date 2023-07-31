@@ -3,7 +3,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-
+const { v4: uuidv4 } = require("uuid");
 const api = require("./routes/index.js");
 // instance of express
 const app = express();
@@ -41,9 +41,38 @@ app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/assets/notes.html"));
 });
 // route for saved notes as json
+app.get("/api/notes", (req, res) => {
+  fs.readFile(dbFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return req
+        .statusCode(500)
+        .json({ error: "Error reading notes from the database." });
+    }
+    const notes = JSON.parse(data);
+    res.json(notes);
+  });
+});
 
-// route for post = when used wants to make a new note
+// ================================  POST Routes  ================================== //
+
+// post route to add a new note
 // > POST/api/notes
+app.post("/api/notes", (req, res) => {
+  // log that a POST request was received
+  console.log(`${req.method} request received to add the new note`);
+  // destructuring assignment for the items in req.body
+  const { title, text } = req.body;
+  // if all the required properties are present
+  if (!title || !text) {
+    return res
+      .status(400)
+      .json({ error: "Please, provide a valid title and text for the note." });
+  }
+  // fs read-file
+  fs.readFile();
+  // fs write-file
+});
 // optional: route for delete > delete posted info based on ID
 // > DELETE /api/notes/:id
 // listen on port
