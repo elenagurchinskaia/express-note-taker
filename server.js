@@ -70,7 +70,22 @@ app.post("/api/notes", (req, res) => {
       .json({ error: "Please, provide a valid title and text for the note." });
   }
   // fs read-file
-  fs.readFile(dbFilePath, JSON.stringify(notes), (err) => {
+  fs.readFile(dbFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .json({ error: "Error reading notes from the database" });
+    }
+    const notes = JSON.parse(data);
+    const newNote = {
+      id: uuidv4(),
+      title,
+      text,
+    };
+  });
+  // fs write-file
+  fs.writeFile(dbFilePath, JSON.stringify(notes), (err) => {
     if (err) {
       console.error(err);
       return res
@@ -79,14 +94,26 @@ app.post("/api/notes", (req, res) => {
     }
     res.json(newNote);
   });
-  // fs write-file
 });
 
-// ================================  DELETE Route  ================================== //
+// ================================  DELETE Route (to delete a note by ID) ================================== //
 
 // optional: route for delete > delete posted info based on ID
 // > DELETE /api/notes/:id
-// listen on port
+app.delete("/api/notes/:id", (req, res) => {
+  const noteId = req.params.id;
+
+  fs.readFile(dbFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .json({ error: "Error reading notes from the database." });
+    }
+    const notes = JSON.parse(data);
+    const filteredNotes = notes.filter((note) => note.id !== noteId);
+  });
+});
 
 // server-side
 // > const from activities
@@ -97,6 +124,7 @@ app.post("/api/notes", (req, res) => {
 
 // ================================  Main server listen  ================================== //
 
+// listen on port
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
