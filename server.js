@@ -70,9 +70,20 @@ app.post("/api/notes", (req, res) => {
       .json({ error: "Please, provide a valid title and text for the note." });
   }
   // fs read-file
-  fs.readFile();
+  fs.readFile(dbFilePath, JSON.stringify(notes), (err) => {
+    if (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .json({ error: "Error writing note to the database." });
+    }
+    res.json(newNote);
+  });
   // fs write-file
 });
+
+// ================================  DELETE Route  ================================== //
+
 // optional: route for delete > delete posted info based on ID
 // > DELETE /api/notes/:id
 // listen on port
