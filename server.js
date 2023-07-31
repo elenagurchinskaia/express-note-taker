@@ -3,6 +3,9 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+// https://uuidonline.com/
+// uuid - to export an obj w/different uuid versions, and v4 to generate a random uuid
+// extract the v4 function from the uuid and rename it as uuidv4
 const { v4: uuidv4 } = require("uuid");
 const api = require("./routes/index.js");
 // instance of express
@@ -45,9 +48,12 @@ app.get("/api/notes", (req, res) => {
   fs.readFile(dbFilePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
-      return req
-        .statusCode(500)
-        .json({ error: "Error reading notes from the database." });
+      return (
+        req
+          // server-side error 500
+          .statusCode(500)
+          .json({ error: "Error reading notes from the database." })
+      );
     }
     const notes = JSON.parse(data);
     res.json(notes);
@@ -65,32 +71,44 @@ app.post("/api/notes", (req, res) => {
   const { title, text } = req.body;
   // if all the required properties are present
   if (!title || !text) {
-    return res
-      .status(400)
-      .json({ error: "Please, provide a valid title and text for the note." });
+    return (
+      res
+        // bad request - contains invalid data
+        .status(400)
+        .json({ error: "Please, provide a valid title and text for the note." })
+    );
   }
   // fs read-file
   fs.readFile(dbFilePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
-      return res
-        .status(500)
-        .json({ error: "Error reading notes from the database" });
+      return (
+        res
+          // server-side error 500
+          .status(500)
+          .json({ error: "Error reading notes from the database" })
+      );
     }
     const notes = JSON.parse(data);
     const newNote = {
+      // generate a unique id for each note that a user inputs
       id: uuidv4(),
       title,
       text,
     };
+    // push the content
+    notes.push(newNote);
   });
   // fs write-file
   fs.writeFile(dbFilePath, JSON.stringify(notes), (err) => {
     if (err) {
       console.error(err);
-      return res
-        .status(500)
-        .json({ error: "Error writing note to the database." });
+      return (
+        res
+          // server-side error 500
+          .status(500)
+          .json({ error: "Error writing note to the database." })
+      );
     }
     res.json(newNote);
   });
@@ -102,7 +120,7 @@ app.post("/api/notes", (req, res) => {
 // > DELETE /api/notes/:id
 app.delete("/api/notes/:id", (req, res) => {
   const noteId = req.params.id;
-
+  // read file
   fs.readFile(dbFilePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
@@ -112,6 +130,19 @@ app.delete("/api/notes/:id", (req, res) => {
     }
     const notes = JSON.parse(data);
     const filteredNotes = notes.filter((note) => note.id !== noteId);
+    // write file
+    fs.writeFile(dbFilePath, JSON.stringify(filteredNotes), (err) => {
+      if (err) {
+        console.error(err);
+        return (
+          res
+            // server-side error 500
+            .status(500)
+            .json({ error: "Error writing notes to the database" })
+        );
+      }
+      res.json({ message: "Note deleted successfully." });
+    });
   });
 });
 
