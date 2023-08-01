@@ -33,8 +33,7 @@ notesRouter.get("/", (req, res) => {
 // ================================  POST Route to add a new note ================================== //
 
 // post route to add a new note
-// > POST/api/notes
-app.post("/api/notes", (req, res) => {
+notesRouter.post("/", (req, res) => {
   // log that a POST request was received
   console.log(`${req.method} request received to add the new note`);
   // destructuring assignment for the items in req.body
@@ -93,7 +92,7 @@ notesRouter.delete("/:id", (req, res) => {
     if (err) {
       console.error(err);
       return res
-        .status(500)
+        .status(500) // server-side error 500
         .json({ error: "Error reading notes from the database." });
     }
     const notes = JSON.parse(data);
@@ -102,27 +101,13 @@ notesRouter.delete("/:id", (req, res) => {
     fs.writeFile(dbFilePath, JSON.stringify(filteredNotes), (err) => {
       if (err) {
         console.error(err);
-        return (
-          res
-            // server-side error 500
-            .status(500)
-            .json({ error: "Error writing notes to the database" })
-        );
+        return res
+          .status(500) // server-side error 500
+          .json({ error: "Error writing notes to the database" });
       }
       res.json({ message: "Note deleted successfully." });
     });
   });
-});
-
-// `GET *` should return the `index.html` file.
-router.length("", (req, res) => {
-  // READ db.json
-});
-// POST /api/notes to receive a new note
-router.post("", (req, res) => {
-  // reading the file
-  // parsing the file into an array
-  // write file
 });
 
 module.exports = router;
