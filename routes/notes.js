@@ -89,7 +89,7 @@ notesRouter.post("/notes", (req, res) => {
 
 // ================================  DELETE Route to delete a note by ID ================================== //
 
-notesRouter.delete("/:id", (req, res) => {
+notesRouter.delete("/notes/:id", (req, res) => {
   const noteId = req.params.id;
   // read file
   fs.readFile(dbFilePath, "utf8", (err, data) => {
@@ -107,7 +107,7 @@ notesRouter.delete("/:id", (req, res) => {
         console.error(err);
         return res
           .status(500) // server-side error 500
-          .json({ error: "Error writing notes to the database" });
+          .json({ error: "Error writing notes to the database." });
       }
       res.json({ message: "Note deleted successfully." });
     });
