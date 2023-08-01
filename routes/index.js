@@ -1,17 +1,11 @@
 // handle the setup of the server, middleware, and routing
 
-const router = require("express");
-const app = require("express").Router();
+const router = require("express").Router();
 
-// import the route modules
-const notesRouter = require("./routes/notes");
+const notesRouter = require("./notes");
+// const path = require("path");
 
-// use route modules
-app.use("/notes", notesRouter);
-// app.use("/api", apiRoute);
+// const app = express();
+router.use("/notes", notesRouter);
 
-// listen app
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log("Server is runing on http://localhost:${PORT}");
-});
+module.exports = router;

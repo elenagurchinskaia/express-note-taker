@@ -2,7 +2,7 @@
 
 // ================================  Import required packages  ================================== //
 
-const express = require("express");
+// const router = require("express").Router();
 // https://uuidonline.com/
 // uuid - to export an obj w/different uuid versions, and v4 to generate a random uuid
 // extract the v4 function from the uuid and rename it as uuidv4
@@ -66,20 +66,21 @@ notesRouter.post("/", (req, res) => {
       text,
     };
     // push the content
-    notes.push(newNote);
+    // notes.push(newNote);
+    console.log(notes);
     // fs write-file
-    fs.writeFile(dbFilePath, JSON.stringify(notes), (err) => {
-      if (err) {
-        console.error(err);
-        return (
-          res
-            // server-side error 500
-            .status(500)
-            .json({ error: "Error writing note to the database." })
-        );
-      }
-      res.json(newNote);
-    });
+    // fs.writeFile(dbFilePath, JSON.stringify(notes), (err) => {
+    //   if (err) {
+    //     console.error(err);
+    //     return (
+    //       res
+    //         // server-side error 500
+    //         .status(500)
+    //         .json({ error: "Error writing note to the database." })
+    //     );
+    //   }
+    //   res.json(newNote);
+    // });
   });
 });
 
