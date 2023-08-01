@@ -1,39 +1,33 @@
 // ================================  Import required packages  ================================== //
-// require
+
 const express = require("express");
-const fs = require("fs");
+const app = express();
 const path = require("path");
+const PORT = 3000;
 // https://uuidonline.com/
 // uuid - to export an obj w/different uuid versions, and v4 to generate a random uuid
 // extract the v4 function from the uuid and rename it as uuidv4
 const { v4: uuidv4 } = require("uuid");
-const api = require("./routes/index.js");
-// instance of express
-const app = express();
-const PORT = 3000;
-// refer to the PORT
 
-// boiler plate info
-// set route to dp.json file
-// > GET /api/notes
+const routes = require("./routes/index.js");
+const notesRouter = require(".routes/notes.js");
 
 // ================================  Middleware to parse incoming data  ================================== //
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
-app.use("/api", api);
-
-// ================================  Global array to store notes  ================================== //
-
-let notes = [];
+// use the routes defined in index.js
+app.use("/api", routes);
+// use the notesRouter for notes-related routes
+app.use("/notes", notesRouter);
 
 // ================================  File path for the db.json file  ================================== //
 
 const dbFilePath = path.join(__dirname, "db", "db.json");
 
-// ================================  GET Routes  ================================== //
+// ================================  GET Route for homepage ================================== //
 
-// route for index.html (Landing Page)
+// route for index.html
 // > GET *
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/assets/index.html"));
@@ -98,19 +92,19 @@ app.post("/api/notes", (req, res) => {
     };
     // push the content
     notes.push(newNote);
-  });
-  // fs write-file
-  fs.writeFile(dbFilePath, JSON.stringify(notes), (err) => {
-    if (err) {
-      console.error(err);
-      return (
-        res
-          // server-side error 500
-          .status(500)
-          .json({ error: "Error writing note to the database." })
-      );
-    }
-    res.json(newNote);
+    // fs write-file
+    fs.writeFile(dbFilePath, JSON.stringify(notes), (err) => {
+      if (err) {
+        console.error(err);
+        return (
+          res
+            // server-side error 500
+            .status(500)
+            .json({ error: "Error writing note to the database." })
+        );
+      }
+      res.json(newNote);
+    });
   });
 });
 
@@ -145,11 +139,6 @@ app.delete("/api/notes/:id", (req, res) => {
     });
   });
 });
-
-// server-side
-// > const from activities
-
-// ================================  Import public folder, html routes  ================================== //
 
 // look at 22 solved
 
