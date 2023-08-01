@@ -2,12 +2,7 @@
 
 const express = require("express");
 const app = express();
-const path = require("path");
 const PORT = 3000;
-// https://uuidonline.com/
-// uuid - to export an obj w/different uuid versions, and v4 to generate a random uuid
-// extract the v4 function from the uuid and rename it as uuidv4
-const { v4: uuidv4 } = require("uuid");
 
 const routes = require("./routes/index.js");
 const notesRouter = require(".routes/notes.js");
@@ -21,123 +16,10 @@ app.use("/api", routes);
 // use the notesRouter for notes-related routes
 app.use("/notes", notesRouter);
 
-// ================================  File path for the db.json file  ================================== //
-
-const dbFilePath = path.join(__dirname, "db", "db.json");
-
 // ================================  GET Route for homepage ================================== //
 
-// route for index.html
-// > GET *
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/assets/index.html"));
-});
-// route to note.html
-// > GET/notes
-app.get("/notes", (req, res) => {
-  res.sendFile(path.join(__dirname, "/public/assets/notes.html"));
-});
-// route for saved notes as json
-app.get("/api/notes", (req, res) => {
-  fs.readFile(dbFilePath, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return (
-        req
-          // server-side error 500
-          .statusCode(500)
-          .json({ error: "Error reading notes from the database." })
-      );
-    }
-    const notes = JSON.parse(data);
-    res.json(notes);
-  });
-});
-
-// ================================  POST Routes  ================================== //
-
-// post route to add a new note
-// > POST/api/notes
-app.post("/api/notes", (req, res) => {
-  // log that a POST request was received
-  console.log(`${req.method} request received to add the new note`);
-  // destructuring assignment for the items in req.body
-  const { title, text } = req.body;
-  // if all the required properties are present
-  if (!title || !text) {
-    return (
-      res
-        // bad request - contains invalid data
-        .status(400)
-        .json({ error: "Please, provide a valid title and text for the note." })
-    );
-  }
-  // fs read-file
-  fs.readFile(dbFilePath, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return (
-        res
-          // server-side error 500
-          .status(500)
-          .json({ error: "Error reading notes from the database" })
-      );
-    }
-    const notes = JSON.parse(data);
-    const newNote = {
-      // generate a unique id for each note that a user inputs
-      id: uuidv4(),
-      title,
-      text,
-    };
-    // push the content
-    notes.push(newNote);
-    // fs write-file
-    fs.writeFile(dbFilePath, JSON.stringify(notes), (err) => {
-      if (err) {
-        console.error(err);
-        return (
-          res
-            // server-side error 500
-            .status(500)
-            .json({ error: "Error writing note to the database." })
-        );
-      }
-      res.json(newNote);
-    });
-  });
-});
-
-// ================================  DELETE Route (to delete a note by ID) ================================== //
-
-// optional: route for delete > delete posted info based on ID
-// > DELETE /api/notes/:id
-app.delete("/api/notes/:id", (req, res) => {
-  const noteId = req.params.id;
-  // read file
-  fs.readFile(dbFilePath, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return res
-        .status(500)
-        .json({ error: "Error reading notes from the database." });
-    }
-    const notes = JSON.parse(data);
-    const filteredNotes = notes.filter((note) => note.id !== noteId);
-    // write file
-    fs.writeFile(dbFilePath, JSON.stringify(filteredNotes), (err) => {
-      if (err) {
-        console.error(err);
-        return (
-          res
-            // server-side error 500
-            .status(500)
-            .json({ error: "Error writing notes to the database" })
-        );
-      }
-      res.json({ message: "Note deleted successfully." });
-    });
-  });
 });
 
 // look at 22 solved
